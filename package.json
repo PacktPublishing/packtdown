@@ -1,7 +1,7 @@
 {
   "name": "packtdown",
   "version": "1.0.0",
-  "description": "",
+  "description": "Compiles Markdown files into html. Using Showdown in GFM syntax. With support for Software Diagrams.",
   "main": "index.js",
   "bin": {
     "packtdown": "./index.js"
