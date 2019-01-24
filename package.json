@@ -11,8 +11,9 @@
     "debug": "cross-env DEBUG=* npm start",
     "format:check": "prettier -c './**/*.js'",
     "format:reformat": "prettier --write './**/*.js'",
-    "lint": "eslint .",
-    "test": "npm run format:check && npm run lint"
+    "lint:check": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "npm run format:check && npm run lint:check"
   },
   "repository": {
     "type": "git",
