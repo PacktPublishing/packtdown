@@ -41,3 +41,6 @@ if (program.glob) {
 }
 
 debug('Parsing files in', glob);
+
+// Run Showdown on each file in the Docs folder and output it
+// todo: directory to output? if default is no good.
