@@ -7,6 +7,7 @@ const program = require('commander');
 const glob = require('glob');
 const fs = require('fs-extra');
 const showdown  = require('showdown');
+const watch = require('glob-watcher');
 
 const { version, description } = require('./package.json');
 
@@ -26,7 +27,8 @@ program
   .version(version, '-v, --version')
   .description(description)
   .option('-d, --directory <directory>', 'The directory to search for MD files')
-  .option('-g, --glob <glob>', 'A custom glob for MD files');
+  .option('-g, --glob <glob>', 'A custom glob for MD files')
+  .option('-w, --watch', 'Watch for changes and recompile file');
 
 program.parse(process.argv);
 
@@ -111,3 +113,13 @@ promiseGlob(mdGlob)
   .catch((err) => {
     error(err);
   });
+
+// if watch
+if(program.watch) {
+  const watcher = watch(mdGlob);
+
+  watcher.on('change', processFile);
+  watcher.on('add', processFile);
+
+  log(`Watching ${mdGlob} for changes`);
+}
