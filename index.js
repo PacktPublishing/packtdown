@@ -4,6 +4,10 @@ require('colors');
 
 const Debug = require('debug');
 const program = require('commander');
+const glob = require('glob');
+const fs = require('fs-extra');
+const showdown  = require('showdown');
+
 const { version, description } = require('./package.json');
 
 // Set up Debug
@@ -26,21 +30,84 @@ program
 
 program.parse(process.argv);
 
-let glob = './docs/**/*.md'; // default glob
+let mdGlob = './docs/**/*.md'; // default glob
 
 if (program.glob) {
   // Set the glob
   debug('Glob Set to', program.glob);
 
   // eslint-disable-next-line prefer-destructuring
-  glob = program.glob;
+  mdGlob = program.glob;
 } else if (program.directory) {
   debug('Directory set to', program.directory);
   // Parse the directory into a glob
-  glob = `./${program.directory}/**/*.md`;
+  mdGlob = `./${program.directory}/**/*.md`;
 }
 
-debug('Parsing files in', glob);
+debug('Parsing files in', mdGlob);
 
 // Run Showdown on each file in the Docs folder and output it
 // todo: directory to output? if default is no good.
+const promiseGlob = (globToProcess) => {
+  return new Promise((res, rej) => {
+    glob(globToProcess, (err, files) => {
+      if(err) return rej(err);
+
+      return res(files);
+    })
+  });
+};
+
+const processFile = (file) => {
+    // Spawn tagged logs because this is a fan-out.
+    const fileLog = Debug(file);
+    const fileLogDetailed = Debug(`${file}:DEBUG`);
+    fileLog.enabled = true;
+
+    fileLog('Started');
+
+    const converter = new showdown.Converter();
+    return fs.readFile(file)
+      .then((buffer) => {
+        const text = buffer.toString();
+
+        fileLogDetailed('Read File:', text);
+
+        const html = converter.makeHtml(text);
+        fileLogDetailed('Converted to HTML', html);
+
+        const newFileName = file.replace(/md$/, 'html');
+
+        fileLog('Outputting to ', newFileName);
+
+        return fs.outputFile(newFileName, html)
+        .then(() => {
+          fileLog('Done!');
+
+          return newFileName;
+        });
+      });
+  };
+
+const processFiles = (files) => {
+  debug('Processing Files:', files);
+  const promises = [];
+  for(let f = 0; f < files.length; f += 1) {
+    const file = files[f];
+
+    debug('Processing: ', file);
+
+    promises.push(processFile(file));
+  }
+  return Promise.all(promises);
+};
+
+// Process the glob and markdown convert each of the files.
+promiseGlob(mdGlob)
+  .then(processFiles)
+  .then(() => {
+    log('Done')
+  })
+  .catch((err) => {
+    error(err);
+  });
