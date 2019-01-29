@@ -1,5 +1,6 @@
 const fs = require('fs-extra');
 const watch = require('glob-watcher');
+const Mustache = require('mustache');
 
 const Converter = require('./showdown-converter');
 const Logger = require('./logger');
@@ -11,7 +12,9 @@ class Packtdown {
 
     this.log.debug('directory: ', options.directory);
     this.log.debug('glob: ', options.glob);
+    this.log.debug('template: ', options.template);
 
+    this.template = options.template;
     this.glob = './docs/**/*.md'; // default glob
 
     if (options.glob) {
@@ -48,8 +51,8 @@ class Packtdown {
 
       const watcher = watch(this.glob);
 
-      watcher.on('change', Packtdown.processFile);
-      watcher.on('add', Packtdown.processFile);
+      watcher.on('change', this.processFile);
+      watcher.on('add', this.processFile);
 
       this.log.log(`Watching ${this.glob} for changes`);
     } catch (error) {
@@ -62,10 +65,10 @@ class Packtdown {
     this.log.log('Processing files');
     this.log.debug(files);
 
-    return Promise.all(files.map(async file => Packtdown.processFile(file)));
+    return Promise.all(files.map(async file => this.processFile(file)));
   }
 
-  static async processFile(file) {
+  async processFile(file) {
     // Spawn tagged logs because this is a fan-out.
     const log = new Logger(file);
     log.log('Processing');
@@ -84,11 +87,21 @@ class Packtdown {
       log.log('Converted to HTML');
       log.debug(html);
 
+      const templateBuffer = await fs.readFile(this.template);
+      const template = templateBuffer.toString();
+
+      log.log('Read Template Contents');
+      log.debug(template);
+
+      const finalHtml = Mustache.render(template, { content: html });
+      log.log('Rendered in Template')
+      log.debug(finalHtml)
+
       const newFileName = file.replace(/md$/, 'html');
 
       log.log('Outputting to', newFileName);
 
-      await fs.outputFile(newFileName, html);
+      await fs.outputFile(newFileName, finalHtml);
       log.log('Done');
     } catch (error) {
       log.error('Error Processing file', error.message);

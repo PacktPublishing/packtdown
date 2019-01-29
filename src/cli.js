@@ -10,6 +10,7 @@ program
   .description(description)
   .option('-d, --directory <directory>', 'The directory to search for MD files')
   .option('-g, --glob <glob>', 'A custom glob for MD files')
+  .option('-t, --template <template>', 'The mustache template to use', './src/template.html')
   .option('-w, --watch', 'Watch for changes and recompile file');
 
 program.parse(process.argv);
