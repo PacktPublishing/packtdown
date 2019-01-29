@@ -17,3 +17,7 @@ Options:
   -h, --help                   output usage information
 ```
 
+## Features
+
+### GFM: URL Autolinking
+Inline links like https://google.com will be converted to actual links.
