@@ -27,6 +27,9 @@
     "packt",
     "markdown"
   ],
+  "engines": {
+    "node": ">=8.10.0"
+  },
   "author": "Packt Publishing LTD",
   "license": "MIT",
   "bugs": {
