@@ -15,7 +15,7 @@ program
 program.parse(process.argv);
 
 const packtdown = new Packtdown(program);
-if(program.watch) {
+if (program.watch) {
   packtdown.watch();
 } else {
   packtdown.run();

@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const showdown = require('showdown');
 const watch = require('glob-watcher');
 
-
 const Logger = require('./logger.js');
 const glob = require('./promise-glob.js');
 
