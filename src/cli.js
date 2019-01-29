@@ -1,5 +1,4 @@
-#!/usr/bin/env node
-
+// Packtdown
 require('colors');
 
 const Debug = require('debug');
@@ -9,7 +8,7 @@ const fs = require('fs-extra');
 const showdown  = require('showdown');
 const watch = require('glob-watcher');
 
-const { version, description } = require('./package.json');
+const { version, description } = require('../package.json');
 
 // Set up Debug
 const log = Debug('packtdown:info');
@@ -50,15 +49,13 @@ debug('Parsing files in', mdGlob);
 
 // Run Showdown on each file in the Docs folder and output it
 // todo: directory to output? if default is no good.
-const promiseGlob = (globToProcess) => {
-  return new Promise((res, rej) => {
+const promiseGlob = (globToProcess) => new Promise((res, rej) => {
     glob(globToProcess, (err, files) => {
       if(err) return rej(err);
 
       return res(files);
     })
   });
-};
 
 const processFile = (file) => {
     // Spawn tagged logs because this is a fan-out.
