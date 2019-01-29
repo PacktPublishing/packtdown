@@ -1,3 +1,3 @@
 #!/usr/bin/env node
 
-const cli = require('./cli.js');
+require('./cli.js');

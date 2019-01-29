@@ -5,7 +5,7 @@ const Debug = require('debug');
 const program = require('commander');
 const glob = require('glob');
 const fs = require('fs-extra');
-const showdown  = require('showdown');
+const showdown = require('showdown');
 const watch = require('glob-watcher');
 
 const { version, description } = require('../package.json');
@@ -49,49 +49,48 @@ debug('Parsing files in', mdGlob);
 
 // Run Showdown on each file in the Docs folder and output it
 // todo: directory to output? if default is no good.
-const promiseGlob = (globToProcess) => new Promise((res, rej) => {
+const promiseGlob = globToProcess =>
+  new Promise((res, rej) => {
     glob(globToProcess, (err, files) => {
-      if(err) return rej(err);
+      if (err) return rej(err);
 
       return res(files);
-    })
+    });
   });
 
-const processFile = (file) => {
-    // Spawn tagged logs because this is a fan-out.
-    const fileLog = Debug(file);
-    const fileLogDetailed = Debug(`${file}:DEBUG`);
-    fileLog.enabled = true;
+const processFile = file => {
+  // Spawn tagged logs because this is a fan-out.
+  const fileLog = Debug(file);
+  const fileLogDetailed = Debug(`${file}:DEBUG`);
+  fileLog.enabled = true;
 
-    fileLog('Started');
+  fileLog('Started');
 
-    const converter = new showdown.Converter();
-    return fs.readFile(file)
-      .then((buffer) => {
-        const text = buffer.toString();
+  const converter = new showdown.Converter();
+  return fs.readFile(file).then(buffer => {
+    const text = buffer.toString();
 
-        fileLogDetailed('Read File:', text);
+    fileLogDetailed('Read File:', text);
 
-        const html = converter.makeHtml(text);
-        fileLogDetailed('Converted to HTML', html);
+    const html = converter.makeHtml(text);
+    fileLogDetailed('Converted to HTML', html);
 
-        const newFileName = file.replace(/md$/, 'html');
+    const newFileName = file.replace(/md$/, 'html');
 
-        fileLog('Outputting to ', newFileName);
+    fileLog('Outputting to ', newFileName);
 
-        return fs.outputFile(newFileName, html)
-        .then(() => {
-          fileLog('Done!');
+    return fs.outputFile(newFileName, html).then(() => {
+      fileLog('Done!');
 
-          return newFileName;
-        });
-      });
-  };
+      return newFileName;
+    });
+  });
+};
 
-const processFiles = (files) => {
+const processFiles = files => {
   debug('Processing Files:', files);
   const promises = [];
-  for(let f = 0; f < files.length; f += 1) {
+  for (let f = 0; f < files.length; f += 1) {
     const file = files[f];
 
     debug('Processing: ', file);
@@ -105,14 +104,14 @@ const processFiles = (files) => {
 promiseGlob(mdGlob)
   .then(processFiles)
   .then(() => {
-    log('Done')
+    log('Done');
   })
-  .catch((err) => {
+  .catch(err => {
     error(err);
   });
 
 // if watch
-if(program.watch) {
+if (program.watch) {
   const watcher = watch(mdGlob);
 
   watcher.on('change', processFile);
