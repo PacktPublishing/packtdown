@@ -1,9 +1,9 @@
 const fs = require('fs-extra');
-const showdown = require('showdown');
 const watch = require('glob-watcher');
 
-const Logger = require('./logger.js');
-const glob = require('./promise-glob.js');
+const Converter = require('./showdown-converter');
+const Logger = require('./logger');
+const glob = require('./promise-glob');
 
 class Packtdown {
   constructor(options) {
@@ -71,7 +71,7 @@ class Packtdown {
     log.log('Processing');
 
     try {
-      const converter = new showdown.Converter();
+      const converter = new Converter();
 
       const fileBuffer = await fs.readFile(file);
       const fileContents = fileBuffer.toString();
